@@ -45,6 +45,23 @@ class SSAudioQueuePlayer: NSObject {
 
     }
     
+    func pause() -> Void {
+        AudioQueuePause(mAudioQueue!)
+    }
+    
+    func resume() -> Void {
+        AudioQueueStart(mAudioQueue!, nil)
+    }
+    
+    func stop() -> Void {
+        AudioQueueStop(mAudioQueue!, false)
+    }
+    
+    func dispose() -> Void {
+        AudioQueueDispose(mAudioQueue!, true)
+        AudioFileClose(mAudioFile!)
+    }
+    
     func prepareAudioQueue(url:NSURL) -> Void {
         var status: OSStatus = AudioFileOpenURL(url,AudioFilePermissions.readPermission, 0,&mAudioFile)
         SSCheckError(status, "AudioFileOpenURL")
@@ -140,32 +157,5 @@ class SSAudioQueuePlayer: NSObject {
             AudioQueueStop(inAQ, false)
             player.mIsRunning = false
         }
-    }
-    
-    func deriveBufferSize(asbDescription:AudioStreamBasicDescription,maxPacketSize:UInt32,seconds:Float64,outBufferSize: UnsafeMutablePointer<UInt32>,outNumPacketsToRead: UnsafeMutablePointer<UInt32>) -> Void {
-        let maxBufferSize:UInt32 = 0x50000
-        let minBufferSize:UInt32 = 0x4000
-        
-        if asbDescription.mFramesPerPacket != 0 {
-            let numPacketsForTime = asbDescription.mSampleRate/Double(asbDescription.mFramesPerPacket)*seconds
-            outBufferSize.pointee = UInt32(numPacketsForTime)*UInt32(maxPacketSize)
-        }
-        else
-        {
-            outBufferSize.pointee = max(maxBufferSize, maxPacketSize)
-        }
-        
-        if (outBufferSize.pointee > maxBufferSize && outBufferSize.pointee > maxPacketSize )
-        {
-            outBufferSize.pointee = maxBufferSize
-        }
-        else {
-            if (outBufferSize.pointee < minBufferSize)
-            {
-                outBufferSize.pointee = minBufferSize
-            }
-        }
-        
-        outNumPacketsToRead.pointee = outBufferSize.pointee / maxPacketSize
     }
 }

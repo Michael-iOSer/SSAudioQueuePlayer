@@ -23,5 +23,14 @@ class ViewController: UIViewController {
         player.play(url: NSURL.fileURL(withPath: filePath) as NSURL)
     }
 
+    @IBAction func pause(_ sender: Any) {
+        player.pause()
+    }
+    
+    
+    @IBAction func resume(_ sender: Any) {
+        player.resume()
+    }
+    
 }
 
